@@ -2234,7 +2234,7 @@ begin
     //ImageAlpha *can* (quite often) be nil. The only reason this doesn't crash, is because Delphi's System.Move
 	 //function happens to check if source and destination pointers are the same. If so, it bails out.
     //Not the kind of thing you can depend on; since other implementations of Move (e.g. FastMem) don't do that check
-    if (ImageAlphia <> nil) and (TChunkIHDR(Source).ImageAlpha <> nil) then
+    if (ImageAlpha <> nil) and (TChunkIHDR(Source).ImageAlpha <> nil) then
       CopyMemory(ImageAlpha, TChunkIHDR(Source).ImageAlpha, Integer(Width) * Integer(Height));
 
     {Copy palette colors}
