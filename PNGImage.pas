@@ -1,4 +1,4 @@
-{Portable Network Graphics Delphi 1.564      (31 July 2006)   }
+{Portable Network Graphics Delphi 1.565      (7 November 2023)   }
 
 {This is a full, open sourced implementation of png in Delphi }
 {It has native support for most of png features including the }
@@ -9,6 +9,11 @@
 
 
 {
+  Versino 1.565
+  2023-11-07   BUG 1     - There was a possible access violation
+                           when applying the alpha mask because an extra
+						   byte was read that possible fell beyond the
+						   end of the row of pixels
   Version 1.564
   2006-07-25   BUG 1     - There was one GDI Palette object leak
                            when assigning from other PNG (fixed)
@@ -211,7 +216,7 @@ uses
  zlibpas, pnglang;
 
 const
-  LibraryVersion = '1.564';
+  LibraryVersion = '1.565';
 
 {$IFNDEF UseDelphi}
   const
@@ -4810,7 +4815,16 @@ begin
           {Optmize when we don´t have transparency}
           if (AlphaSource[i2] <> 0) then
             if (AlphaSource[i2] = 255) then
-              ImageData[i] := pRGBQuad(@ImageSource[i2 * 3])^
+			 begin
+			  //20231107 Stijn Sanders
+              //ImageData[i] := pRGBQuad(@ImageSource[i2 * 3])^
+			  //copied 4 bytes, but the 4th byte possibly falls outside of 
+			  //ImageSource on the last pixel, which may cause an access violation
+			  ImageData[i].rgbRed := pRGBQuad(@ImageSource[i2 * 3]).rgbRed;
+			  ImageData[i].rgbGreen := pRGBQuad(@ImageSource[i2 * 3]).rgbGreen;
+			  ImageData[i].rgbBlue := pRGBQuad(@ImageSource[i2 * 3]).rgbBlue;
+			  ImageData[i].rgbReserved := 0;
+			 end
             else
               with ImageData[i] do
               begin
